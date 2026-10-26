@@ -54,6 +54,23 @@ then run `npm.cmd run images`. Originals are preserved and ignored by Git.
 Read the [image workflow](docs/product-images.md) before importing. Importing an
 image never creates or approves a product, invents stock/prices or enables orders.
 
+## Visual system
+
+The storefront uses graphite `#101114`, charcoal `#24272D`, warm white `#F5F5F2`,
+electric lime `#D6FF43` and white, with self-hosted Poppins. Shared card, gallery,
+form and editorial components keep secondary pages consistent with the homepage.
+
+GSAP 3.15.0, ScrollTrigger and Lenis 1.3.27 are dynamically loaded only by the
+homepage motion surface on capable desktop devices. Mobile, save-data and
+reduced-motion users keep native scrolling and fully visible content. Cleanup
+restores inline styles, listeners, scrolling and animation timers on navigation
+or preference changes. Same-document anchors preserve focus and browser history.
+
+The two images in `public/images/editorial/` are labeled AI-generated decorative
+concepts. They never represent a catalog model, specification or stock claim and
+are never substituted for product gallery photographs. Approved real product
+photography is still required for actual listings.
+
 ## GitHub and deployment
 
 Repository: [MalakAnasKhan/malakcomputers](https://github.com/MalakAnasKhan/malakcomputers).

@@ -95,6 +95,7 @@ next-env.d.ts
 /tests/*
 !/tests/storefront.test.ts
 !/tests/catalog-storefront.test.ts
+!/tests/visual-storefront.test.ts
 !/tests/images.test.ts
 !/tests/release-secrets.test.mjs
 !/tests/register.mjs

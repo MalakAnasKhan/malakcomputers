@@ -12,6 +12,12 @@ process.env.APP_URL = "https://malak.example";
 registerHooks({
   resolve(specifier, context, nextResolve) {
     if (specifier === "server-only") return { url: marker, shortCircuit: true };
+    if (specifier === "next/image") {
+      // Native Node sees Next's CommonJS default wrapper differently from the
+      // bundler. Unwrap the real component for SSR tests; do not mock it.
+      const imageModule = nextResolve("next/image.js", context).url;
+      return { url: "data:text/javascript," + encodeURIComponent(`import Image from ${JSON.stringify(imageModule)}; export default Image.default ?? Image;`), shortCircuit: true };
+    }
     if (["next/server", "next/headers", "next/navigation"].includes(specifier)) {
       return nextResolve(`${specifier}.js`, context);
     }

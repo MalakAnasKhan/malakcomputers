@@ -14,7 +14,7 @@ export function privateRepositoryPath(path) {
     /^src\/(?:lib\/(?:env|supabase)\/|lib\/prisma\.ts$|modules\/(?:auth|access-control)\/)/.test(path) ||
     /^src\/.*\.(?:md|sql)$/i.test(path) ||
     /^docs\//.test(path) && !["docs/storefront-launch.md", "docs/product-images.md"].includes(path) ||
-    /^tests\//.test(path) && !["tests/storefront.test.ts", "tests/catalog-storefront.test.ts", "tests/images.test.ts", "tests/release-secrets.test.mjs", "tests/register.mjs", "tests/server-only.mjs", "tests/smoke.mjs"].includes(path) ||
+    /^tests\//.test(path) && !["tests/storefront.test.ts", "tests/catalog-storefront.test.ts", "tests/visual-storefront.test.ts", "tests/images.test.ts", "tests/release-secrets.test.mjs", "tests/register.mjs", "tests/server-only.mjs", "tests/smoke.mjs"].includes(path) ||
     path === "scripts/validate-development.mjs";
 }
 
