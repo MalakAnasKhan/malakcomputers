@@ -1,0 +1,11 @@
+import Image from "next/image";
+import { PageContainer } from "@/components/layout/page-container";
+import { PageIntro } from "@/components/storefront/page-intro";
+import { ContactCta } from "@/components/storefront/contact-cta";
+import { OrderingSteps } from "@/components/storefront/ordering-steps";
+import { pageMetadata } from "@/modules/storefront/seo";
+
+export const metadata = pageMetadata("About Malak Computers", "Meet Malak Computers, a Pakistan-based computer hardware business sourcing products through suppliers in China, with personal ordering on WhatsApp.", "/about");
+export default function AboutPage() {
+  return <><PageContainer><PageIntro eyebrow="Our perspective" title="Hardware is personal. So is the conversation." description="Every build starts with an idea. Malak Computers is here to connect that idea with the components behind it." breadcrumbs={[{ label: "About" }]} /><div className="grid items-center gap-10 border-t border-neutral-200 pb-16 pt-10 lg:grid-cols-2 lg:gap-20"><figure className="bg-[#f2f2ef] p-6 sm:p-10"><div className="relative aspect-square"><Image src="/images/showcase/build-study.svg" alt="Illustrated PC hardware study, not a product photograph" fill sizes="(max-width: 1023px) 100vw, 50vw" className="object-contain" /></div><figcaption className="eyebrow text-center">A study in components · Illustration</figcaption></figure><div><p className="eyebrow">Pakistan, with a wider perspective</p><h2 className="mt-5 text-3xl font-semibold leading-tight tracking-[-0.04em] sm:text-4xl">Considered components.<br />Direct conversations.</h2><p className="mt-6 text-sm leading-8 text-neutral-600">Malak Computers is a Pakistan-based computer hardware business sourcing products through suppliers in China. This storefront brings our product catalog together in one place, with enquiries and order confirmation handled personally on WhatsApp.</p><p className="mt-5 text-sm leading-8 text-neutral-600">Explore the specifications, make a shortlist, and discuss the exact product you need. Availability, delivery arrangements, payment details and the final order are confirmed in that conversation.</p><div className="mt-8"><ContactCta compact /></div></div></div></PageContainer><OrderingSteps /></>;
+}

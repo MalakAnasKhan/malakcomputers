@@ -1,0 +1,18 @@
+# Only public storefront build inputs may be uploaded. Internal documentation,
+# preserved backend, originals, certificates, secrets and migration files stay local.
+/*
+!/src/
+!/public/
+!/package.json
+!/package-lock.json
+!/.npmrc
+!/next.config.ts
+!/tsconfig.json
+!/eslint.config.mjs
+
+/src/generated/
+/src/lib/env/
+/src/lib/prisma.ts
+/src/lib/supabase/
+/src/modules/auth/
+/src/modules/access-control/

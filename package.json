@@ -1,0 +1,50 @@
+{
+  "name": "malak-computers",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --max-warnings=0",
+    "test": "node ./scripts/run-tests.mjs",
+    "test:storefront": "node --import ./tests/register.mjs --test tests/*storefront.test.ts",
+    "test:smoke": "node ./tests/smoke.mjs",
+    "env:validate": "node ./scripts/validate-development.mjs",
+    "pretypecheck": "next typegen",
+    "typecheck": "tsc --noEmit",
+    "pretypecheck:backend": "npm run prisma:generate",
+    "typecheck:backend": "tsc --noEmit -p tsconfig.backend.json",
+    "release:check": "node ./scripts/verify-public-release.mjs",
+    "prisma:generate": "prisma generate",
+    "prisma:validate": "prisma validate",
+    "images": "node ./scripts/import-images.mjs",
+    "release:secrets": "node ./scripts/scan-release-secrets.mjs"
+  },
+  "dependencies": {
+    "@next/env": "16.4.2",
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.117.3",
+    "next": "16.4.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "0.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "4.3.3",
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.2",
+    "prisma": "7.10.0",
+    "sharp": "0.35.5",
+    "tailwindcss": "4.3.3",
+    "typescript": "6.0.3"
+  },
+  "engines": {
+    "node": "24.x"
+  }
+}

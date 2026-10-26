@@ -1,0 +1,7 @@
+# Consistent text in Windows and Linux checkouts; binary assets stay untouched.
+* text=auto eol=lf
+*.webp binary
+*.woff2 binary
+*.jpg binary
+*.jpeg binary
+*.png binary

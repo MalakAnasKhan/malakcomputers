@@ -1,0 +1,113 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Ignore all local environment and secret files.
+.env*
+
+# Never load these local credential archives from application or CLI code.
+/.secrets/
+/.envrc
+/backups/
+*.dump
+*.backup
+*.pgpass
+pgpass.conf
+*.key
+*.pfx
+*.p12
+*.p8
+
+# Local database CA certificates, provisioned separately on each machine.
+/certs/
+
+# Local isolated deployment verification (contains no credentials).
+/.storefront-check/
+
+# Generated locally from the Prisma schema, never hand-edited.
+/src/generated/prisma/
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Original product photography and local importer cache/reports.
+/product-images-original/
+/.image-cache/
+
+# Local editor, agent, and cloud account configuration.
+/.agents/
+/.codex/
+/.aws/
+/.vscode/
+
+# Public repository boundary: preserve all backend work locally, never publish it.
+/backend-preserved/
+/config/
+/prisma/
+/prisma.config.ts
+/tsconfig.backend.json
+/src/lib/env/
+/src/lib/prisma.ts
+/src/lib/supabase/
+/src/modules/auth/
+/src/modules/access-control/
+/src/**/*.md
+/src/**/*.sql
+
+# Internal documentation is excluded by default; only public storefront guides ship.
+/docs/*
+!/docs/storefront-launch.md
+!/docs/product-images.md
+
+# Publish public tests only; backend suites remain local and are still runnable.
+/tests/*
+!/tests/storefront.test.ts
+!/tests/catalog-storefront.test.ts
+!/tests/images.test.ts
+!/tests/release-secrets.test.mjs
+!/tests/register.mjs
+!/tests/server-only.mjs
+!/tests/smoke.mjs
+/scripts/validate-development.mjs
+
+# Historical prototypes and third-party design references stay local.
+/Reference Images/
+/index.html
+/style.css
+
+# Certificates outside the normal certs directory must not enter a public commit.
+*.crt
+*.cer
+*.der
