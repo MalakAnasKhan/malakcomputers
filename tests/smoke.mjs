@@ -53,7 +53,7 @@ for (const path of routes) {
       assert.equal((page.body.match(/aria-label="View image [1-4]:/g) ?? []).length, 4);
     }
   }
-  if (path.startsWith("/policies/")) { assert.match(page.body, /awaiting business approval/); assert.match(page.body, /noindex/); }
+  if (path.startsWith("/policies/")) { assert.doesNotMatch(page.body, /awaiting business approval|This page identifies the information still to be confirmed|not a published final policy/); assert.match(page.body, /noindex/); }
   pages.set(path, page);
 }
 for (const path of ["/", "/shop", "/categories", "/about", "/contact"]) assert.ok(pages.has(path));
