@@ -5,8 +5,9 @@ product galleries, search and filters, category pages and WhatsApp enquiries.
 No database, authentication service or environment variables are required to
 build or run the public storefront.
 
-The approved WhatsApp number is **923109806478**. The current products are
-clearly labeled samples and cannot be ordered. Search indexing remains disabled
+The approved WhatsApp number is **923109806478**. Demonstration products are
+clearly labeled samples and cannot be ordered. Photo-discovered products accept
+general price/stock enquiries without asserting availability. Search indexing remains disabled
 until real product data, policies and business details are approved.
 
 ## Local development
@@ -44,6 +45,7 @@ from this public repository. Never add them to installation or deployment hooks.
 
 - `src/modules/catalog/data.ts`: typed product records and explicit sample status.
 - `src/modules/catalog/products.ts`: catalog validation and generated image galleries.
+- `src/modules/catalog/discovered-products.json`: generated photo-backed product identities.
 - `src/lib/site.ts`: approved public brand, WhatsApp, contact and HTTPS origin settings.
 - `src/lib/whatsapp.ts`: encoded general-chat and product enquiry links.
 - `public/products/`: optimized product photography.
@@ -52,7 +54,9 @@ from this public repository. Never add them to installation or deployment hooks.
 Add exactly four numbered originals per product to `product-images-original/`,
 then run `npm.cmd run images`. Originals are preserved and ignored by Git.
 Read the [image workflow](docs/product-images.md) before importing. Importing an
-image never creates or approves a product, invents stock/prices or enables orders.
+image creates an enquiry listing when its four-image group is valid, but never
+approves business information, invents stock/prices or enables orders. Commit the
+generated catalog and optimized images, then push when approved, for Vercel to update.
 
 ## Visual system
 

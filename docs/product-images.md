@@ -1,100 +1,128 @@
-# Product photography import
+# Image-based product catalog
 
-Run `npm.cmd run images` from the project root (Node 24, `npm.cmd ci` installed).
-Sharp 0.35.5 is pinned as a development dependency; the importer never loads `.env`
-files, database clients, authentication modules, or network resources.
+Run from the project root with Node 24 and the existing npm dependencies:
 
-## Originals and naming
+    npm.cmd run images
 
-Place files directly in `product-images-original/`:
+The command uses the existing Sharp dependency. It never loads environment files,
+backend modules or network resources.
 
-```
-Z890 Aorus Pro Ice 1.jpg
-Z890 Aorus Pro Ice 2.jpg
-Z890 Aorus Pro Ice 3.jpg
-Z890 Aorus Pro Ice 4.jpg
-```
+## Add a product
 
-Each product needs exactly one image for each number, with a space, hyphen or
-underscore separating the name and number. Extensions are case insensitive:
-JPEG/JPG, PNG, WebP, AVIF, TIFF/TIF, HEIC/HEIF and single-frame GIF. Actual codec
-availability depends on the installed Sharp build; undecodable files are reported
-and skipped. Animated/multipage inputs, SVG, subdirectories, symlinks/junctions,
-files over 100 MiB and images over 80 megapixels are not imported.
+Place exactly four original photographs directly in product-images-original/:
 
-The originals folder is ignored by Git. Originals are read only: never renamed,
-overwritten or deleted. Do not store private photos there: generated images in
-`public/` will be publicly accessible if the website is eventually deployed.
+    Z890 Aorus Pro Ice 1.jpg
+    Z890 Aorus Pro Ice 2.jpg
+    Z890 Aorus Pro Ice 3.jpg
+    Z890 Aorus Pro Ice 4.jpg
 
-## Outputs and catalog matching
+Only the final space and number 1 through 4 are removed. The remaining name is used
+for display. Case-only variations share a group; spaces and punctuation normalize
+to stable lowercase URL slugs. Conflicting names producing the same slug are
+reported, including collisions with previously generated listings. Do not rename
+an existing source group merely to edit its name: review its existing ID and URL
+and add approved metadata to the manual catalog instead.
 
-Complete groups produce `public/products/<normalized-product-slug>/1.webp` through
-`4.webp`. Orientation is corrected before resizing. Sharp fits images inside
-1200 × 1200 without cropping or enlargement and strips source metadata. Quality
-starts at 90 and can decrease to 86 or 82 to target at most 250 KiB; detail is
-prioritized over a strict size ceiling. Small images are not padded to reach
-100 KiB. This uses Sharp's documented
-[resize](https://sharp.pixelplumbing.com/api-resize/),
-[orientation](https://sharp.pixelplumbing.com/api-operation/) and
-[WebP](https://sharp.pixelplumbing.com/api-output/#webp) options.
+Extensions are case insensitive: JPG/JPEG, PNG, WebP, AVIF, TIFF/TIF, HEIC/HEIF and
+single-frame GIF. Codec support depends on the installed Sharp build. Animated or
+multipage inputs, SVG, subdirectories, links/junctions, files over 100 MiB and images
+over 80 megapixels are rejected or reported. Missing numbers, duplicate slots,
+invalid names and ambiguous manual matches are never guessed.
 
-Manual business data lives in `src/modules/catalog/data.ts`; this is the existing
-typed catalog, extracted without changing any product facts. The importer compares
-normalized group names to catalog names and slugs. Only a unique match receives
-four numerical image paths in the generated `src/modules/catalog/imported-images.json`.
-`products.ts` applies that manifest using `image-galleries.ts`, which only replaces
-images and validates the four ordered local paths. Existing `next/image` gallery
-and card components display the resulting images.
+Originals remain untouched and Git-ignored. Use only photographs you may publish:
+optimized outputs are public and source metadata is stripped.
 
-Unmatched images are optimized but do not create products, prices, stock claims,
-routes or order buttons. Importing a photograph never approves a sample listing.
-Add only owner-approved product data to the typed catalog, then rerun `images` to
-bind an existing optimized group without encoding again.
+## Generated files and manual information
 
-Duplicate slots, missing images, ambiguous filenames/matches and output-slug
-collisions are reported rather than guessed. Invalid groups are skipped. Any input
-issue preserves the previous gallery manifest as a whole. Fix the issues and rerun.
-With a fully valid scan, bindings are rebuilt from current complete groups; removed
-groups fall back to the manually specified catalog images. Old optimized outputs
-are never deleted automatically.
+Complete groups produce public/products/<slug>/1.webp through 4.webp. Images are
+oriented correctly and fitted inside 1200 by 1200 without cropping or enlargement.
+WebP quality 90, 86 or 82 targets at most 250 KiB while preserving detail. Small
+files are never padded. See Sharp's official documentation:
+https://sharp.pixelplumbing.com/api-resize/
+https://sharp.pixelplumbing.com/api-output/#webp
+
+The importer writes two deterministic public files:
+
+- src/modules/catalog/discovered-products.json: stable image-derived ID, slug,
+  display name and four numerical image paths for newly discovered products.
+- src/modules/catalog/imported-images.json: gallery bindings for matched manual
+  products, preserving their existing IDs and canonical URLs.
+
+src/modules/catalog/data.ts remains the owner-approved typed manual catalog.
+Matching uses normalized names or existing slugs. Manual metadata takes precedence;
+only images change. When adding approved information for a discovered product,
+retain its generated ID and slug in the manual entry to preserve links, then rerun
+images. Do not edit generated JSON to supply prices, stock or other business facts.
+
+products.ts merges both sources into the storefront catalog. New photo-backed
+entries have null price, unconfirmed availability, unspecified brand/category,
+empty description/specifications and no featured status. Photographs never approve
+stock, pricing, specifications or ordering. Samples remain clearly marked and
+cannot receive product ordering or product enquiry buttons.
+
+Imported listings appear in All Products, case-insensitive search and static product
+routes. Approved manual categories drive category pages and filters; unknown
+categories are not guessed from names. Cards use image 1. Detail galleries retain
+four interactive numbered thumbnails using next/image.
+
+Unknown price displays Price on request; unverified stock displays Availability to
+be confirmed. Enquire on WhatsApp asks for price, stock and details without claiming
+an order or payment. Order on WhatsApp still requires non-sample approved price and
+availability plus a configured HTTPS site origin. If site.url is unset, general
+product enquiries include a relative product path. Set the approved deployed origin
+in src/lib/site.ts to include full links.
 
 ## Incremental processing and recovery
 
-`.image-cache/state.json` records source/output SHA-256 hashes and processing settings.
-Unchanged images with intact outputs are reused without encoding or rewriting.
-Changed originals or settings regenerate only the affected images. Missing outputs
-are recreated. A local lock prevents simultaneous runs. `.image-cache/report.json`
-contains the latest groups, missing/duplicate issues, original/optimized byte counts,
-dimensions, quality, cache hits and compression savings. Console output summarizes
-the same information. Both cache and report are ignored by Git.
+.image-cache/state.json records source/output SHA-256 hashes and encoder settings.
+Unchanged images are not encoded or rewritten. Changed originals regenerate only
+affected images. Missing outputs are recreated. A lock prevents simultaneous runs.
+The ignored .image-cache/report.json and terminal output report groups, issues,
+missing images, incomplete metadata, source/output sizes, quality and savings.
 
-The importer refuses to overwrite outputs whose bytes do not match its ownership
-cache, including files created manually or checked out without the local cache.
-Do not delete the cache just to force a run. If the cache is lost or outputs were
-edited, first back up and review those generated files; move the affected generated
-outputs aside manually before regenerating. Originals are always retained. After
-an interrupted run, confirm no importer is active before removing a stale
-`.image-cache/import.lock`. Partial disk-write failures can leave unbound outputs;
-review them before retrying. Source and destination paths must remain regular
-local paths with no links or junctions.
+Invalid input preserves both published catalog manifests. Valid groups may produce
+optimized files but no partial gallery is published. Resolve issues and rerun.
+Missing originals never delete existing listings, gallery bindings or optimized
+outputs; the report flags them for review. Intentional retirement requires separate
+manual catalog and output review.
 
-Commit generated WebPs and the gallery manifest along with the importer and typed
-catalog. Optimization is an explicit development command, not an install/build hook.
+The importer refuses to overwrite outputs not matching its local ownership cache.
+A fresh checkout includes images but not this ignored cache. Before regenerating
+there, back up and review generated files, and manually move affected outputs aside.
+Do not delete the cache just to force encoding. After interruption, confirm no
+importer is running before removing a stale .image-cache/import.lock. Filesystem
+write failures can leave unbound outputs: review before retrying.
 
-## Current import
+## Publish changes
 
-One group: **Z890 Aorus Pro Ice**, four JPEGs, no missing/duplicate images.
-All outputs are 1200 × 1200. Original total 12,757.8 KiB; optimized total 804.6 KiB;
-93.69% saved. The four outputs are approximately 190.8, 217.9, 191.5 and 204.4 KiB.
-This group is **unmatched** because the catalog contains only the four existing
-sample listings. No product was added or approved, and ordering remains disabled.
+Optimization is an explicit local command, never an install/build hook. Vercel needs
+only committed optimized images and catalog JSON, not originals, cache or database
+credentials. For future imports:
 
-## Verification
+    npm.cmd run images
+    npm.cmd test
+    npm.cmd run lint
+    npm.cmd run typecheck
+    npm.cmd run build
+    git add -- public/products src/modules/catalog/discovered-products.json src/modules/catalog/imported-images.json
+    git diff --cached --stat
+    npm.cmd run release:secrets
+    git commit -m "Import product photographs and catalog discoveries"
+    git push origin main
 
-`npm.cmd test` includes isolated image fixtures testing grouping, ambiguity, missing
-and corrupt inputs, output ownership, numerical galleries, resizing, no enlargement,
-orientation, metadata removal, unchanged originals, incremental cache behavior and
-preservation of sample approval/order guards. Run `npm.cmd run lint`,
-`npm.cmd run typecheck`, `npm.cmd run typecheck:backend` and `npm.cmd run build`
-after changes. All image tests are offline and use disposable fixture directories
-inside `.storefront-check/`.
+Review staged changes before committing; stage intentional manual metadata edits
+separately. Push only when publication is approved. The connected Vercel project
+then rebuilds from GitHub. Running images alone does not update the live website.
+
+## Current import and verification
+
+Z890 Aorus Pro Ice is discovered at /products/z890-aorus-pro-ice with ID
+image-z890-aorus-pro-ice. Four JPEGs produce four 1200-square WebPs: approximately
+190.8, 217.9, 191.5 and 204.4 KiB. Combined size falls from 12,757.8 to 804.6 KiB
+(93.69% saved). Cached outputs are reused. Price, availability, brand, category,
+description and specifications still need approved details.
+
+npm.cmd test covers grouping, conflicts, missing/corrupt inputs, ordering, bounds,
+metadata removal, unchanged originals, incremental imports, listing retention and
+manual metadata precedence. Storefront tests cover Z890 search, placeholder details
+and enquiry/order separation. Also run lint, TypeScript and a production build.

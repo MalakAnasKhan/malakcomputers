@@ -7,7 +7,7 @@ export type Product = {
   readonly slug: string;
   readonly name: string;
   readonly brand: string;
-  readonly category: Category;
+  readonly category: Category | null;
   /** Whole Pakistani rupees; null means no approved price. */
   readonly pricePkr: number | null;
   readonly images: readonly [{ readonly src: string; readonly alt: string }, ...{ readonly src: string; readonly alt: string }[]];

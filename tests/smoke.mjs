@@ -47,6 +47,11 @@ for (const path of routes) {
     assert.match(page.body, /SKU:/);
     assert.match(page.body, /image gallery/);
     if (page.body.includes("Sample listing")) { assert.match(page.body, /ordering unavailable/); assert.match(page.body, /noindex/); }
+    if (path === "/products/z890-aorus-pro-ice") {
+      for (const text of ["Z890 Aorus Pro Ice", "Price on request", "Availability to be confirmed", "Enquire on WhatsApp", "Specifications awaiting approved details."]) assert.ok(page.body.includes(text));
+      assert.doesNotMatch(page.body, /Order on WhatsApp/);
+      assert.equal((page.body.match(/aria-label="View image [1-4]:/g) ?? []).length, 4);
+    }
   }
   if (path.startsWith("/policies/")) { assert.match(page.body, /awaiting business approval/); assert.match(page.body, /noindex/); }
   pages.set(path, page);
@@ -77,6 +82,11 @@ for (const name of ["gpu", "cpu", "memory", "storage"]) {
   assert.match(image.headers["content-type"], /image\/svg\+xml/);
 }
 assert.equal((await request("/images/showcase/build-study.svg")).status, 200);
+for (const number of [1, 2, 3, 4]) {
+  const image = await request(`/products/z890-aorus-pro-ice/${number}.webp`);
+  assert.equal(image.status, 200);
+  assert.match(image.headers["content-type"], /image\/webp/);
+}
 for (const weight of [400, 500, 600, 700]) {
   const font = await request(`/fonts/poppins-latin-${weight}.woff2`);
   assert.equal(font.status, 200);

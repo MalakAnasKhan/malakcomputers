@@ -16,7 +16,7 @@ try {
   const report = await importProductImages({ root, catalog: catalogData });
   console.log(`Products identified: ${report.groups.length}`);
   for (const group of report.groups) {
-    console.log(`${group.name}: ${group.matched ? `MATCHED → ${group.matched}` : "UNMATCHED (no catalog product created)"}`);
+    console.log(`${group.name}: ${group.matched ? `MATCHED -> ${group.matched}` : report.discovered.some(entry => entry.slug === group.slug) ? `DISCOVERED -> /products/${group.slug}` : "NOT PUBLISHED (resolve reported issues)"}`);
     console.log(`  Missing images: ${group.missing.length ? group.missing.join(", ") : "none"}`);
     for (const issue of group.issues) console.error(`  ISSUE: ${issue}`);
   }
@@ -31,6 +31,8 @@ try {
   for (const issue of report.issues) console.error(`ISSUE: ${issue}`);
   if (report.ignored.length) console.log(`Unsupported files ignored: ${report.ignored.join(", ")}`);
   console.log("Detailed local report: .image-cache/report.json");
+  console.log(`Image-backed catalog entries: ${report.discovered.length}`);
+  for (const warning of report.warnings) console.log(`REVIEW: ${warning}`);
   if (report.issues.length || report.groups.some(group => group.issues.length)) process.exitCode = 1;
 } catch {
   console.error("Image import stopped. Ensure the originals folder exists, no other importer is running, and cache/output paths are regular writable files. No catalog approval or business data was changed.");

@@ -3,8 +3,10 @@ import { categories, type Product } from "./types";
 import { catalogData } from "./data";
 import galleries from "./imported-images.json" with { type: "json" };
 import { applyImageGalleries } from "./image-galleries";
+import discovered from "./discovered-products.json" with { type: "json" };
+import { mergeDiscoveredProducts } from "./discovery";
 
-export const products: readonly Product[] = applyImageGalleries(catalogData, galleries);
+export const products: readonly Product[] = mergeDiscoveredProducts(applyImageGalleries(catalogData, galleries), discovered);
 
 export function validateCatalog(catalog: readonly Product[]): void {
   const ids = new Set<string>();
@@ -13,7 +15,7 @@ export function validateCatalog(catalog: readonly Product[]): void {
     if (!product.id.trim() || ids.has(product.id) || slugs.has(product.slug) || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(product.slug)) {
       throw new Error("Catalog IDs and slugs must be present and unique; slugs must be URL-safe.");
     }
-    if (!product.name.trim() || !product.brand.trim() || !product.description.trim() || !categories.includes(product.category)) {
+    if (!product.name.trim() || !product.brand.trim() || (product.category !== null && !categories.includes(product.category))) {
       throw new Error("Catalog product details are incomplete.");
     }
     if (product.pricePkr !== null && (!Number.isSafeInteger(product.pricePkr) || product.pricePkr < 0)) {

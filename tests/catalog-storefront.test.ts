@@ -5,7 +5,7 @@ import { products } from "../src/modules/catalog/products";
 import type { Product } from "../src/modules/catalog/types";
 import { defaultFilters, filterProducts, readFilters, filterQuery, relatedProducts } from "../src/modules/catalog/filters";
 import { categoryDetails, getCategory, categoryHref } from "../src/modules/catalog/categories";
-import { isOrderableProduct, productEnquiryUrl } from "../src/modules/catalog/presentation";
+import { isOrderableProduct, productEnquiryUrl, productDetailsEnquiryUrl } from "../src/modules/catalog/presentation";
 import { publicOrigin, publicPageUrl } from "../src/lib/urls";
 import { storefrontRobots, storefrontSitemap } from "../src/modules/storefront/seo";
 import { policies, getPolicy } from "../src/modules/storefront/policies";
@@ -50,6 +50,25 @@ test("search matches names, SKU, category, brand and specifications without case
     assert.ok(matches.some((product) => product.id === "test-a"));
   }
   assert.deepEqual(filterProducts(catalog, { ...defaultFilters, query: "no-match-anywhere" }), []);
+});
+
+test("photo-discovered Z890 is searchable with four ordered images and unverified metadata", () => {
+  const product = products.find(product => product.slug === "z890-aorus-pro-ice")!;
+  assert.ok(product);
+  for (const query of ["Aorus", "Z890", "Ice", "aOrUs"]) assert.ok(filterProducts(products, { ...defaultFilters, query }).includes(product));
+  assert.deepEqual(product.images.map(image => image.src), [1, 2, 3, 4].map(n => `/products/z890-aorus-pro-ice/${n}.webp`));
+  assert.equal(product.images[0].src, "/products/z890-aorus-pro-ice/1.webp");
+  assert.equal(product.category, null);
+  assert.equal(filterProducts(products, { ...defaultFilters, category: "Memory" }).includes(product), false);
+  assert.equal(product.pricePkr, null);
+  assert.equal(product.stockStatus, "unconfirmed");
+  assert.equal(isOrderableProduct(product), false);
+  assert.equal(productEnquiryUrl(product, site.whatsappNumber, "https://store.example"), null);
+  const message = new URL(productDetailsEnquiryUrl(product, site.whatsappNumber, "https://store.example")!).searchParams.get("text")!;
+  for (const value of [product.name, product.id, "price and current availability", "https://store.example/products/z890-aorus-pro-ice", "not a confirmed or paid order"]) assert.ok(message.includes(value));
+  assert.doesNotMatch(message, /I would like to order|Price:|In stock/);
+  assert.equal(productDetailsEnquiryUrl(product, null), null);
+  assert.equal(productDetailsEnquiryUrl({ ...product, isSample: true }, site.whatsappNumber), null);
 });
 
 test("category, brand and availability filters compose and reset predictably", () => {

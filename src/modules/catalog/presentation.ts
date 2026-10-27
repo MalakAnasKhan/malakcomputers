@@ -4,7 +4,7 @@ import { publicPageUrl } from "@/lib/urls";
 import type { Product, StockStatus } from "./types";
 
 export function formatPrice(pricePkr: number | null): string {
-  return pricePkr === null ? "Price to be confirmed" : new Intl.NumberFormat("en-PK", {
+  return pricePkr === null ? "Price on request" : new Intl.NumberFormat("en-PK", {
     style: "currency", currency: "PKR", currencyDisplay: "code", maximumFractionDigits: 0,
   }).format(pricePkr);
 }
@@ -16,6 +16,14 @@ export const stockLabels: Record<StockStatus, string> = {
 export function isOrderableProduct(product: Product): boolean {
   return !product.isSample && ["in-stock", "on-request"].includes(product.stockStatus) &&
     product.pricePkr !== null && Number.isSafeInteger(product.pricePkr) && product.pricePkr >= 0;
+}
+
+/** Price/stock enquiry only, never an order or an availability claim. */
+export function productDetailsEnquiryUrl(product: Product, number: string | null, origin: string | null = site.url): string | null {
+  if (product.isSample || !number) return null;
+  const path = `/products/${encodeURIComponent(product.slug)}`;
+  const page = publicPageUrl(path, origin) ?? path;
+  return whatsappUrl(number, `Hello ${site.name}, could you confirm the price and current availability of ${product.name}?\nProduct ID/SKU: ${product.id}\nProduct page: ${page}\nPlease also share delivery charges and product details. This is a general enquiry, not a confirmed or paid order.`);
 }
 
 export function productEnquiryUrl(product: Product, number: string | null, origin: string | null = site.url): string | null {

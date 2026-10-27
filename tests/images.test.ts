@@ -7,6 +7,7 @@ import { importProductImages, scanImageGroups } from "../scripts/image-importer"
 import { applyImageGalleries } from "../src/modules/catalog/image-galleries";
 import { products, validateCatalog } from "../src/modules/catalog/products";
 import { productEnquiryUrl } from "../src/modules/catalog/presentation";
+import { mergeDiscoveredProducts, validateDiscoveries } from "../src/modules/catalog/discovery";
 
 const catalog = [{ name: "Fixture Board", slug: "fixture-board" }];
 const filenames = (name = "Fixture Board") => [4, 2, 1, 3].map(number => `${name} ${number}.png`);
@@ -91,13 +92,93 @@ test("Sharp import fits inside 1200, never enlarges, preserves originals, caches
   });
 });
 
-test("unmatched complete groups get images but cannot create catalog products or approval data", async () => {
+test("unmatched complete groups create deterministic discovery entries without business facts", async () => {
   await fixture(async root => {
     await originals(root, "Unknown board");
     const report = await importProductImages({ root, catalog });
     assert.equal(report.processed, 4);
     assert.equal(report.groups[0].matched, null);
     assert.deepEqual(JSON.parse(await readFile(resolve(root, "src/modules/catalog/imported-images.json"), "utf8")), {});
+    const path = resolve(root, "src/modules/catalog/discovered-products.json");
+    const bytes = await readFile(path, "utf8");
+    const entries = JSON.parse(bytes);
+    assert.deepEqual(entries, [{ id: "image-unknown-board", slug: "unknown-board", name: "Unknown board", images: [1, 2, 3, 4].map(n => `/products/unknown-board/${n}.webp`) }]);
+    assert.deepEqual(report.discovered, entries);
+    const product = mergeDiscoveredProducts([], entries)[0];
+    assert.equal(product.pricePkr, null);
+    assert.equal(product.stockStatus, "unconfirmed");
+    assert.equal(product.category, null);
+    assert.equal(product.brand, "Not specified");
+    assert.equal(product.description, "");
+    assert.deepEqual(product.specifications, []);
+    assert.equal(product.isSample, false);
+    assert.equal(productEnquiryUrl(product, "+12025550123", "https://store.example"), null);
+    validateCatalog([product]);
+    assert.match(report.warnings.join(), /await approved/);
+    const again = await importProductImages({ root, catalog });
+    assert.equal(again.processed, 0);
+    assert.equal(again.cached, 4);
+    assert.equal(await readFile(path, "utf8"), bytes);
+    for (const number of [1, 2, 3, 4]) await unlink(resolve(root, `product-images-original/Unknown board ${number}.png`));
+    const absent = await importProductImages({ root, catalog });
+    assert.equal(absent.discovered.length, 1);
+    assert.match(absent.warnings.join(), /originals absent/);
+    assert.equal(await readFile(path, "utf8"), bytes);
+    assert.ok((await stat(resolve(root, "public/products/unknown-board/1.webp"))).size > 0);
+  });
+});
+
+test("case differences share a group but punctuation conflicts and non-space suffixes fail closed", () => {
+  const scan = scanImageGroups(["Aorus Ice 1.PNG", "aorus ice 2.jpg", "AORUS ICE 3.webp", "Aorus Ice 4.png"], []);
+  assert.equal(scan.groups.length, 1);
+  assert.deepEqual(scan.groups[0].issues, []);
+  assert.equal(scanImageGroups(["Aorus Ice-1.png", "Aorus Ice_2.png"], []).issues.length, 2);
+  assert.equal(scanImageGroups([...filenames("Aorus+Ice"), ...filenames("Aorus Ice")], []).groups.filter(g => g.issues.length).length, 2);
+  assert.equal(scanImageGroups([...filenames("Aorus Ice"), ...filenames("Aorus Ice ")], []).groups.filter(g => g.issues.length).length, 2);
+});
+
+test("manual catalog identity and all metadata survive discovery, including later approvals", () => {
+  const entry = { id: "image-fixture-board", slug: "fixture-board", name: "Fixture Board", images: [1, 2, 3, 4].map(n => `/products/fixture-board/${n}.webp`) };
+  const manual = { ...products[0], id: "approved-sku", slug: "existing-canonical-url", name: "Fixture Board", brand: "Approved fixture brand", category: "Memory" as const, description: "Approved fixture description", pricePkr: 1200, stockStatus: "in-stock" as const, isSample: false };
+  const merged = mergeDiscoveredProducts([manual], [entry]);
+  assert.equal(merged.length, 1);
+  const { images: oldImages, ...before } = manual;
+  const { images: newImages, ...after } = merged[0];
+  assert.deepEqual(before, after);
+  assert.notDeepEqual(oldImages, newImages);
+  assert.deepEqual(newImages.map(image => image.src), entry.images);
+  assert.throws(() => mergeDiscoveredProducts([manual, { ...manual, id: "another", slug: "another" }], [entry]), /Ambiguous/);
+  assert.throws(() => mergeDiscoveredProducts([{ ...manual, id: entry.id, name: "Unrelated product" }], [entry]), /unrelated/);
+  assert.match(scanImageGroups(filenames(), [{ id: entry.id, name: "Unrelated product", slug: "unrelated" }]).groups[0].issues.join(), /unrelated/);
+  for (const invalid of [[entry, entry], [{ ...entry, pricePkr: 1200 }], [{ ...entry, slug: "../escape" }], [{ ...entry, images: [...entry.images].reverse() }]]) assert.throws(() => validateDiscoveries(invalid));
+});
+
+test("new imports preserve previous galleries, reject historical slug conflicts and retain invalid groups", async () => {
+  await fixture(async root => {
+    await originals(root, "Fixture+Board");
+    await importProductImages({ root, catalog: [] });
+    const generated = resolve(root, "src/modules/catalog/discovered-products.json");
+    const before = await readFile(generated, "utf8");
+    for (const n of [1, 2, 3, 4]) await unlink(resolve(root, `product-images-original/Fixture+Board ${n}.png`));
+    await originals(root);
+    const conflict = await importProductImages({ root, catalog: [] });
+    assert.match(conflict.groups[0].issues.join(), /previously discovered slug/);
+    assert.equal(await readFile(generated, "utf8"), before);
+  });
+  await fixture(async root => {
+    await originals(root);
+    await importProductImages({ root, catalog });
+    const path = resolve(root, "src/modules/catalog/imported-images.json");
+    const before = await readFile(path, "utf8");
+    for (const n of [1, 2, 3, 4]) await unlink(resolve(root, `product-images-original/Fixture Board ${n}.png`));
+    await originals(root, "Next Board");
+    await importProductImages({ root, catalog });
+    assert.equal(await readFile(path, "utf8"), before);
+    assert.equal(JSON.parse(await readFile(resolve(root, "src/modules/catalog/discovered-products.json"), "utf8"))[0].name, "Next Board");
+    await unlink(resolve(root, "product-images-original/Next Board 4.png"));
+    const incomplete = await importProductImages({ root, catalog });
+    assert.deepEqual(incomplete.groups[0].missing, [4]);
+    assert.equal(incomplete.discovered.length, 1);
   });
 });
 

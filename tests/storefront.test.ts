@@ -71,7 +71,7 @@ test("only non-sample, available catalog entries can generate an enquiry", () =>
   assert.match(url.searchParams.get("text")!, /12,000/);
   assert.equal(productEnquiryUrl(fixture, null), null);
   assert.equal(productEnquiryUrl({ ...fixture, stockStatus: "out-of-stock" }, testNumber, "https://store.example"), null);
-  assert.equal(formatPrice(null), "Price to be confirmed");
+  assert.equal(formatPrice(null), "Price on request");
   assert.match(formatPrice(12000), /12,000/);
 });
 

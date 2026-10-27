@@ -3,11 +3,12 @@ import { lstat, mkdir, open, readFile, readdir, rename, unlink, writeFile } from
 import { dirname, extname, isAbsolute, relative, resolve, sep } from "node:path";
 import sharp from "sharp";
 
-type CatalogIdentity = { readonly slug: string; readonly name: string };
+type CatalogIdentity = { readonly id?: string; readonly slug: string; readonly name: string };
 type Group = { name: string; slug: string; files: Record<string, string[]>; missing: number[]; issues: string[]; matched: string | null };
 type CachedImage = { signature: string; source: string; sourceHash: string; outputHash: string; originalBytes: number; optimizedBytes: number; width: number; height: number; quality: number };
 export type ImageResult = CachedImage & { output: string; cached: boolean };
-export type ImportReport = { groups: Group[]; images: ImageResult[]; issues: string[]; ignored: string[]; processed: number; cached: number; originalBytes: number; optimizedBytes: number; savingsPercent: number };
+type Discovery = { id: string; slug: string; name: string; images: string[] };
+export type ImportReport = { groups: Group[]; images: ImageResult[]; issues: string[]; ignored: string[]; warnings: string[]; discovered: Discovery[]; processed: number; cached: number; originalBytes: number; optimizedBytes: number; savingsPercent: number };
 const extensions = new Set([".jpg", ".jpeg", ".png", ".webp", ".avif", ".tif", ".tiff", ".heic", ".heif", ".gif"]);
 const signature = `v1:${sharp.versions.sharp}:${sharp.versions.vips}:1200:inside:no-enlarge:auto-orient:q90-86-82:effort6`;
 const hash = (buffer: Buffer) => createHash("sha256").update(buffer).digest("hex");
@@ -22,12 +23,14 @@ export function scanImageGroups(names: readonly string[], catalog: readonly Cata
   for (const filename of [...names].sort()) {
     const extension = extname(filename);
     if (!extensions.has(extension.toLowerCase())) { ignored.push(filename); continue; }
-    const match = filename.slice(0, -extension.length).match(/^(.*?)[ _-]+([1-4])$/u);
+    const match = filename.slice(0, -extension.length).match(/^(.*) ([1-4])$/u);
     if (!match || !match[1].trim()) { issues.push(`Ambiguous filename (expected product name and number 1–4): ${filename}`); continue; }
-    const name = match[1].trim();
-    const group = groups.get(name) ?? { name, slug: imageSlug(name), files: {}, missing: [], issues: [], matched: null };
+    const name = match[1];
+    // Case-only differences are one name. Punctuation/spacing collisions still fail closed.
+    const key = name.normalize("NFC").toLocaleLowerCase("en");
+    const group = groups.get(key) ?? { name, slug: imageSlug(name), files: {}, missing: [], issues: [], matched: null };
     (group.files[match[2]] ??= []).push(filename);
-    groups.set(name, group);
+    groups.set(key, group);
   }
   for (const group of groups.values()) {
     if (!group.slug || /^(con|prn|aux|nul|com[0-9]|lpt[0-9])$/.test(group.slug) || group.slug.length > 120) group.issues.push("Unsafe or unsupported product slug.");
@@ -38,6 +41,7 @@ export function scanImageGroups(names: readonly string[], catalog: readonly Cata
     }
     if (group.missing.length) group.issues.push(`Missing images: ${group.missing.join(", ")}.`);
     const matches = catalog.filter(product => imageSlug(product.name) === group.slug || product.slug === group.slug);
+    if (catalog.some(product => product.id === `image-${group.slug}` && !matches.includes(product))) group.issues.push("Generated product ID conflicts with an unrelated manual product.");
     if (matches.length === 1) group.matched = matches[0].slug;
     else if (matches.length > 1) group.issues.push("Ambiguous catalog match.");
   }
@@ -109,10 +113,24 @@ export async function importProductImages({ root: projectRoot, catalog }: { root
     const entries = await readdir(input, { withFileTypes: true });
     const scan = scanImageGroups(entries.filter(entry => entry.isFile()).map(entry => entry.name), catalog);
     for (const entry of entries.filter(entry => !entry.isFile())) scan.issues.push(`Non-file entry skipped: ${entry.name}`);
-    const report: ImportReport = { ...scan, images: [], processed: 0, cached: 0, originalBytes: 0, optimizedBytes: 0, savingsPercent: 0 };
+    const report: ImportReport = { ...scan, images: [], warnings: [], discovered: [], processed: 0, cached: 0, originalBytes: 0, optimizedBytes: 0, savingsPercent: 0 };
     const manifestPath = await safePath(root, resolve(root, "src/modules/catalog/imported-images.json"));
     const oldManifest = await readOptional(manifestPath);
-    const galleries: Record<string, string[]> = {};
+    const galleries: Record<string, string[]> = oldManifest ? JSON.parse(oldManifest.toString()) : {};
+    const discoveryPath = await safePath(root, resolve(root, "src/modules/catalog/discovered-products.json"));
+    const oldDiscoveries = await readOptional(discoveryPath);
+    const discoveries: Discovery[] = oldDiscoveries ? JSON.parse(oldDiscoveries.toString()) : [];
+    if (!Array.isArray(discoveries) || discoveries.some(entry => !entry || Object.keys(entry).sort().join() !== "id,images,name,slug" || typeof entry.name !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(entry.slug) || imageSlug(entry.name) !== entry.slug || entry.id !== `image-${entry.slug}` || !Array.isArray(entry.images) || entry.images.length !== 4 || entry.images.some((path, i) => path !== `/products/${entry.slug}/${i + 1}.webp`)) || new Set(discoveries.map(entry => entry.slug)).size !== discoveries.length) {
+      throw new Error("Invalid generated catalog. Review it before importing.");
+    }
+    for (const entry of discoveries) {
+      const group = report.groups.find(group => group.slug === entry.slug);
+      if (!group) report.warnings.push(`${entry.name}: originals absent (images 1, 2, 3, 4); existing listing and images retained for review.`);
+      else if (group.name.toLocaleLowerCase("en") !== entry.name.toLocaleLowerCase("en")) group.issues.push("Name conflicts with a previously discovered slug; review instead of merging.");
+    }
+    for (const slug of Object.keys(galleries)) {
+      if (!report.groups.some(group => group.matched === slug)) report.warnings.push(`${slug}: original group absent; existing manual gallery retained for review.`);
+    }
     for (const group of report.groups) {
       if (group.issues.length) continue;
       const pending: { data: Buffer; outputPath: string; entry: ImageResult }[] = [];
@@ -152,14 +170,28 @@ export async function importProductImages({ root: projectRoot, catalog }: { root
         report.images.push(item.entry);
         if (wasCached) report.cached++; else report.processed++;
       }
-      if (group.matched) galleries[group.matched] = pending.map(item => item.entry.output);
+      if (group.matched) {
+        galleries[group.matched] = pending.map(item => item.entry.output);
+        // Manual canonical identity and metadata take precedence over discovery.
+        const previousIndex = discoveries.findIndex(entry => entry.slug === group.slug);
+        if (previousIndex !== -1) discoveries.splice(previousIndex, 1);
+      } else {
+        const previous = discoveries.find(entry => entry.slug === group.slug);
+        if (!previous) discoveries.push({ id: `image-${group.slug}`, slug: group.slug, name: group.name, images: pending.map(item => item.entry.output) });
+      }
     }
     // Any invalid input aborts catalog manifest updates, preserving the previous gallery bindings.
     if (!report.issues.length && report.groups.every(group => !group.issues.length)) {
-      await writeAtomic(root, manifestPath, Buffer.from(JSON.stringify(galleries, null, 2) + "\n"));
+      const sortedGalleries = Object.fromEntries(Object.entries(galleries).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0));
+      await writeAtomic(root, manifestPath, Buffer.from(JSON.stringify(sortedGalleries, null, 2) + "\n"));
+      discoveries.sort((a, b) => a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0);
+      await writeAtomic(root, discoveryPath, Buffer.from(JSON.stringify(discoveries, null, 2) + "\n"));
     } else if (!oldManifest) {
       await writeAtomic(root, manifestPath, Buffer.from("{}\n"));
     }
+    // Report the actually published catalog, even when an invalid scan preserves it.
+    report.discovered = JSON.parse((await readOptional(discoveryPath))?.toString() ?? "[]");
+    for (const entry of report.discovered) report.warnings.push(`${entry.name}: price, availability, brand, category, description and specifications await approved manual details.`);
     state.signature = signature;
     await writeAtomic(root, statePath, Buffer.from(JSON.stringify(state, null, 2) + "\n"));
     report.originalBytes = report.images.reduce((sum, item) => sum + item.originalBytes, 0);
