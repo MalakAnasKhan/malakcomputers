@@ -43,7 +43,7 @@ test("editorial concepts are optimized, clearly identified and never substituted
 test("restyled gallery renders four numerical next/image thumbnails with accessible sample status", () => {
   const images = [1, 2, 3, 4].map(number => ({ src: `/products/fixture-gallery/${number}.webp`, alt: `Offline gallery fixture view ${number}` }));
   const html = renderToStaticMarkup(createElement(ProductGallery, { images: [images[0], ...images.slice(1)], name: "Offline gallery fixture", isSample: true }));
-  assert.equal((html.match(/<button\b/g) ?? []).length, 4);
+  assert.equal((html.match(/class="gallery-thumb"/g) ?? []).length, 4);
   let previous = -1;
   for (const number of [1, 2, 3, 4]) {
     const index = html.indexOf(`aria-label="View image ${number}:`);
@@ -53,4 +53,6 @@ test("restyled gallery renders four numerical next/image thumbnails with accessi
   assert.match(html, /aria-pressed="true"/);
   assert.match(html, /not offered for sale/);
   assert.match(html, /_next\/image/);
+  assert.match(html, /class="object-cover"/);
+  assert.match(html, /aria-pressed="false" aria-controls="[^"]+"[^>]*>Show full image/);
 });
