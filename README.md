@@ -60,9 +60,10 @@ The storefront uses graphite `#101114`, charcoal `#24272D`, warm white `#F5F5F2`
 electric lime `#D6FF43` and white, with self-hosted Poppins. Shared card, gallery,
 form and editorial components keep secondary pages consistent with the homepage.
 
-GSAP 3.15.0, ScrollTrigger and Lenis 1.3.27 are dynamically loaded only by the
-homepage motion surface on capable desktop devices. Mobile, save-data and
-reduced-motion users keep native scrolling and fully visible content. Cleanup
+Lenis 1.3.27 smooth scrolling is available across all pages through the root motion
+surface on capable desktop devices. GSAP 3.15.0 and ScrollTrigger are loaded only
+for homepage reveals and parallax. Mobile, save-data and reduced-motion users
+keep native scrolling and fully visible content. Cleanup
 restores inline styles, listeners, scrolling and animation timers on navigation
 or preference changes. Same-document anchors preserve focus and browser history.
 

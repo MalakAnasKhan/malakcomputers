@@ -8,14 +8,13 @@ import { CatalogNotice } from "@/components/storefront/catalog-notice";
 import { OrderingSteps } from "@/components/storefront/ordering-steps";
 import { EditorialImage } from "@/components/storefront/editorial-image";
 import { FinalCta } from "@/components/storefront/final-cta";
-import { MotionSurface } from "@/components/storefront/motion-surface";
 import { Icon } from "@/components/ui/icon";
 import { pageMetadata } from "@/modules/storefront/seo";
 
 export const metadata = pageMetadata("PC hardware for what’s next", "Explore PC hardware with Malak Computers, a Pakistan-based business. Browse components and confirm your order personally on WhatsApp.", "/");
 
 export default function HomePage() {
-  return <MotionSurface>
+  return <>
     <section className="hero-section">
       <PageContainer>
         <div className="hero-grid">
@@ -42,5 +41,5 @@ export default function HomePage() {
     </section>
     <OrderingSteps />
     <FinalCta />
-  </MotionSurface>;
+  </>;
 }

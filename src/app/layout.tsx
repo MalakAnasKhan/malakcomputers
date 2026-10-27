@@ -4,6 +4,7 @@ import { site } from "@/lib/site";
 import localFont from "next/font/local";
 import { publicOrigin } from "@/lib/urls";
 import "./globals.css";
+import { MotionSurface } from "@/components/storefront/motion-surface";
 
 const poppins = localFont({
   src: [
@@ -30,7 +31,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <a href="#main-content" className="skip-link">
           Skip to content
         </a>
-        {children}
+        <MotionSurface>{children}</MotionSurface>
       </body>
     </html>
   );

@@ -19,6 +19,10 @@ test("smooth anchors accept same-document fragments and preserve normal navigati
   const page = "https://store.example/";
   assert.equal(sameDocumentAnchor("/#how-to-order", page), "how-to-order");
   assert.equal(sameDocumentAnchor("#the%20details", page), "the details");
+  const shop = "https://store.example/shop?category=Memory";
+  assert.equal(sameDocumentAnchor("#search", shop), "search");
+  assert.equal(sameDocumentAnchor("/shop?category=Memory#search", shop), "search");
+  assert.equal(sameDocumentAnchor("/shop#search", shop), null);
   for (const destination of ["/shop#search", "https://other.example/#catalog", "?sort=price#catalog", "#", "#%00", "#%E0%A4%A", "javascript:alert(1)", "https://user:password@store.example/#catalog"]) assert.equal(sameDocumentAnchor(destination, page), null);
 });
 
