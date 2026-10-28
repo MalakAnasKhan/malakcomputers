@@ -130,6 +130,17 @@ Sources: [Next.js JSON-LD](https://nextjs.org/docs/app/guides/json-ld),
 These are owner actions after separately approved publication; no Google account,
 Search Console property or sitemap submission is created by application code.
 
+The currently approved verification method is **HTML file upload**. The supplied
+file is stored at `public/googleaa8db744f80445ec.html`, with the exact supplied
+verification text. After publishing, open
+`https://malakcomputers.vercel.app/googleaa8db744f80445ec.html` and confirm it shows
+the verification text without signing in or redirecting. Then click **Verify** in
+Search Console. Keep the file available after verification. This method does not
+require a meta tag: `site.googleSiteVerification` remains null. Do not put this
+filename into the meta-tag setting.
+
+The following steps describe the alternative HTML-tag method and sitemap submission:
+
 1. In Google Search Console, add a **URL-prefix** property for
    `https://malakcomputers.vercel.app/`. Use URL-prefix verification for this hosted
    address; you do not control the parent `vercel.app` DNS zone. A future custom

@@ -70,6 +70,8 @@ for homepage reveals and parallax. Mobile, save-data and reduced-motion users
 keep native scrolling and fully visible content. Cleanup
 restores inline styles, listeners, scrolling and animation timers on navigation
 or preference changes. Same-document anchors preserve focus and browser history.
+Each animated element owns its ref and starts GSAP only from its own post-hydration
+effect. The root scrolling controller never styles streamed page descendants.
 
 The two images in `public/images/editorial/` are labeled AI-generated decorative
 concepts. They never represent a catalog model, specification or stock claim and

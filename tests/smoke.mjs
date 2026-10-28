@@ -132,4 +132,8 @@ assert.equal(sitemap.status, 200);
 assert.match(sitemap.body, /urlset/);
 assert.doesNotMatch(sitemap.body, /sample-|supabase/);
 for (const path of ["/", "/shop", "/contact", "/products/z890-aorus-pro-ice", "/policies/returns"]) assert.ok(sitemap.body.includes(`${productionOrigin}${path}`));
+const verification = await request("/googleaa8db744f80445ec.html");
+assert.equal(verification.status, 200);
+assert.equal(verification.headers.location, undefined);
+assert.equal(verification.body.trim(), "google-site-verification: googleaa8db744f80445ec.html");
 console.log(`${checks} public loopback HTTP checks passed across ${routes.length} pages, navigation destinations, assets, SEO and missing/private routes. No database or Auth requests.`);

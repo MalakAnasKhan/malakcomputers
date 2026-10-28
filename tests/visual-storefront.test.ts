@@ -7,6 +7,7 @@ import { products } from "../src/modules/catalog/products";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ProductGallery } from "../src/modules/catalog/product-gallery";
+import { OrderingSteps } from "../src/components/storefront/ordering-steps";
 
 test("enhanced motion is opt-in for capable desktop devices, never reduced-motion/mobile/save-data users", () => {
   const desktop = { reducedMotion: false, width: 1440, finePointer: true, saveData: false, memory: 8, cores: 8 };
@@ -55,4 +56,11 @@ test("restyled gallery renders four numerical next/image thumbnails with accessi
   assert.match(html, /_next\/image/);
   assert.match(html, /class="object-cover"/);
   assert.match(html, /aria-pressed="false" aria-controls="[^"]+"[^>]*>Show full image/);
+});
+
+test("ordering steps render visible SSR markup without animation-owned inline styles", () => {
+  const html = renderToStaticMarkup(createElement(OrderingSteps));
+  assert.equal((html.match(/data-reveal="true"/g) ?? []).length, 5);
+  for (const title of ["Explore Products", "Contact on WhatsApp", "Confirm Your Order", "Receive Your Product"]) assert.ok(html.includes(title));
+  assert.doesNotMatch(html, /style=|suppressHydrationWarning/);
 });

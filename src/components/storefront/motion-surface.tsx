@@ -38,19 +38,10 @@ export function MotionSurface({ children }: { children: ReactNode }) {
           const unsubscribe = lenis.on("scroll", ScrollTrigger.update);
           gsap.ticker.add(tick);
           gsap.ticker.lagSmoothing(0);
-          const context = gsap.context(() => {
-            if (window.scrollY < 40 && performance.now() < 2500) gsap.fromTo("[data-hero-entry]", { y: 18, opacity: 0.5 }, { y: 0, opacity: 1, duration: 0.65, stagger: 0.09, ease: "power2.out", clearProps: "transform,opacity" });
-            scope.current!.querySelectorAll<HTMLElement>("[data-reveal], [data-product-card]").forEach(element => {
-              if (element.getBoundingClientRect().top < window.innerHeight * 0.85) return;
-              gsap.fromTo(element, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power2.out", clearProps: "transform,opacity", scrollTrigger: { trigger: element, start: "top 92%", once: true } });
-            });
-            scope.current!.querySelectorAll<HTMLElement>("[data-parallax]").forEach(element => {
-              gsap.fromTo(element, { y: -10, scale: 1.06 }, { y: 10, scale: 1.06, ease: "none", scrollTrigger: { trigger: element.parentElement, start: "top bottom", end: "bottom top", scrub: 0.6 } });
-            });
-          }, scope);
+          // Targets own their animations after their individual hydration commits.
+          // A layout effect must not style a still-dehydrated streamed page.
           void document.fonts.ready.then(() => { if (live) ScrollTrigger.refresh(); });
           cleanupAnimation = () => {
-            context.revert();
             unsubscribe();
             gsap.ticker.remove(tick);
             gsap.ticker.lagSmoothing(500, 33);
