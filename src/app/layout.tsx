@@ -5,6 +5,9 @@ import localFont from "next/font/local";
 import { publicOrigin } from "@/lib/urls";
 import "./globals.css";
 import { MotionSurface } from "@/components/storefront/motion-surface";
+import { isPreviewDeployment } from "@/modules/storefront/deployment";
+import { organizationStructuredData } from "@/modules/storefront/structured-data";
+import { JsonLd } from "@/components/storefront/json-ld";
 
 const poppins = localFont({
   src: [
@@ -20,14 +23,16 @@ const origin = publicOrigin(site.url);
 export const metadata: Metadata = {
   title: { default: site.name, template: `%s | ${site.name}` },
   description: site.description,
+  ...(site.googleSiteVerification ? { verification: { google: site.googleSiteVerification } } : {}),
   ...(origin ? { metadataBase: new URL(origin) } : {}),
-  robots: site.preview || !origin ? { index: false, follow: false } : { index: true, follow: true },
+  robots: site.preview || !origin || isPreviewDeployment() ? { index: false, follow: false } : { index: true, follow: true },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={poppins.variable}>
       <body className="antialiased">
+        <JsonLd data={organizationStructuredData()} />
         <a href="#main-content" className="skip-link">
           Skip to content
         </a>

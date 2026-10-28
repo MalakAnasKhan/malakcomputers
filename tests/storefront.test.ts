@@ -76,7 +76,7 @@ test("only non-sample, available catalog entries can generate an enquiry", () =>
 });
 
 test("launch cannot index sample products or enable enquiries without a validated number", () => {
-  if (products.some((product) => product.isSample)) assert.equal(site.preview, true);
+  for (const product of products.filter(product => product.isSample)) assert.equal(productEnquiryUrl(product, testNumber), null);
   if (!site.preview) {
     assert.ok(site.whatsappNumber, "An approved WhatsApp number is required for launch.");
     assert.ok(publicOrigin(site.url), "An approved public domain is required for launch.");

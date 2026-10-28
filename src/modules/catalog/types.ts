@@ -17,4 +17,8 @@ export type Product = {
   readonly featured: boolean;
   /** Samples are always excluded from WhatsApp ordering. */
   readonly isSample: boolean;
+  /** Set only after product-specific approval; omitted means eligibility unknown. */
+  readonly checkingWarrantyEligible?: boolean;
+  /** Explicit false removes the listing from all public discovery and detail routes. */
+  readonly published?: boolean;
 };

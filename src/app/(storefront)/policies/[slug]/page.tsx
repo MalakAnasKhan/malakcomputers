@@ -11,7 +11,7 @@ export const dynamicParams = false;
 export function generateStaticParams() { return policies.map(({ slug }) => ({ slug })); }
 export async function generateMetadata({ params }: Props) {
   const policy = getPolicy((await params).slug);
-  return policy ? pageMetadata(policy.title, policy.summary, `/policies/${policy.slug}`, true) : { title: "Information not found" };
+  return policy ? pageMetadata(policy.title, policy.summary, `/policies/${policy.slug}`) : { title: "Information not found" };
 }
 export default async function PolicyPage({ params }: Props) {
   const policy = getPolicy((await params).slug);

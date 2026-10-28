@@ -21,6 +21,8 @@ function request(path) {
 const manifest = JSON.parse(readFileSync(".next/prerender-manifest.json", "utf8"));
 const routes = Object.keys(manifest.routes).filter((path) => path === "/" || /^\/(?:shop|about|contact|categories|products|policies)(?:\/|$)/.test(path));
 const pages = new Map();
+const productionOrigin = "https://malakcomputers.vercel.app";
+const allTitles = new Set(), allDescriptions = new Set();
 for (const path of routes) {
   const page = await request(path);
   assert.equal(page.status, 200, path);
@@ -29,7 +31,22 @@ for (const path of routes) {
   assert.match(page.body, /Skip to content/);
   assert.equal(page.headers["x-content-type-options"], "nosniff");
   assert.equal(page.headers["x-frame-options"], "DENY");
-  assert.match(page.body, /<meta name="robots" content="noindex, nofollow"/);
+  const robots = page.body.match(/<meta name="robots" content="([^"]+)"/)?.[1];
+  const sampleOnly = path.includes("/products/sample-") || path.startsWith("/categories/");
+  assert.equal(robots, sampleOnly ? "noindex, nofollow" : "index, follow", `Indexing: ${path}`);
+  const canonical = page.body.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
+  assert.equal(new URL(canonical).href, new URL(path, productionOrigin).href, `Canonical: ${path}`);
+  const title = page.body.match(/<title>([^<]+)<\/title>/)?.[1];
+  const description = page.body.match(/<meta name="description" content="([^"]+)"/)?.[1];
+  assert.ok(title && !allTitles.has(title), `Unique title: ${path}`); allTitles.add(title);
+  assert.ok(description && !allDescriptions.has(description), `Unique description: ${path}`); allDescriptions.add(description);
+  assert.equal((page.body.match(/<meta name="robots"/g) ?? []).length, 1);
+  assert.equal((page.body.match(/rel="canonical"/g) ?? []).length, 1);
+  assert.doesNotMatch(page.body, /google-site-verification/);
+  const structured = [...page.body.matchAll(/<script type="application\/ld\+json">([^<]+)<\/script>/g)].map(match => JSON.parse(match[1]));
+  assert.ok(structured.some(item => item["@graph"]?.some(node => node["@type"] === "Organization")), `Organization: ${path}`);
+  for (const item of structured) assert.doesNotMatch(JSON.stringify(item), /"(?:offers|aggregateRating|review|geo|openingHours|sameAs)":/);
+  if (path !== "/") assert.ok(structured.some(item => item["@type"] === "BreadcrumbList"));
   assert.match(page.body, /aria-controls="mobile-navigation"/);
   assert.match(page.body, /id="mobile-navigation" hidden=""/);
   assert.match(page.body, /Chat on WhatsApp/);
@@ -51,9 +68,15 @@ for (const path of routes) {
       for (const text of ["Z890 Aorus Pro Ice", "Price on request", "Availability to be confirmed", "Enquire on WhatsApp", "Specifications awaiting approved details."]) assert.ok(page.body.includes(text));
       assert.doesNotMatch(page.body, /Order on WhatsApp/);
       assert.equal((page.body.match(/aria-label="View image [1-4]:/g) ?? []).length, 4);
+      assert.match(page.body, /Ask about warranty coverage/);
+      assert.doesNotMatch(page.body, /Eligible products include a 7-day checking warranty/);
+      const product = structured.find(item => item["@type"] === "Product");
+      assert.equal(product?.url, `${productionOrigin}${path}`);
+      assert.ok(page.body.includes(`${productionOrigin}/products/z890-aorus-pro-ice/1.webp`));
     }
+    if (path.includes("/sample-")) assert.ok(!structured.some(item => item["@type"] === "Product"));
   }
-  if (path.startsWith("/policies/")) { assert.doesNotMatch(page.body, /awaiting business approval|This page identifies the information still to be confirmed|not a published final policy/); assert.match(page.body, /noindex/); }
+  if (path.startsWith("/policies/")) assert.doesNotMatch(page.body, /awaiting business approval|This page identifies the information still to be confirmed|not a published final policy/);
   pages.set(path, page);
 }
 for (const path of ["/", "/shop", "/categories", "/about", "/contact"]) assert.ok(pages.has(path));
@@ -61,7 +84,13 @@ assert.match(pages.get("/").body, /Why Malak Computers/);
 assert.match(pages.get("/").body, /id="how-to-order"/);
 assert.match(pages.get("/shop").body, /data-product-card=/);
 assert.match(pages.get("/shop").body, /id="search"/);
-assert.match(pages.get("/contact").body, /\+923109806478/);
+assert.match(pages.get("/contact").body, /\+92 310 9806478/);
+for (const [path, page] of pages) {
+  assert.ok(page.body.includes("Office # 01, CoWork Floor 1 of CFC Center, Bypass Mingora Swat, Khyber Pakhtunkhwa, Pakistan."), `Address in footer: ${path}`);
+  assert.match(page.body, /Get Directions/);
+  assert.doesNotMatch(page.body, /Policies awaiting approval/);
+}
+for (const text of ["Explore Products", "Contact on WhatsApp", "Confirm Your Order", "Receive Your Product"]) assert.ok(pages.get("/").body.includes(text));
 assert.doesNotMatch(pages.get("/contact").body, /Awaiting approved business details|business number has not been published/);
 // Follow every public navigation/product/policy destination without visiting external links.
 for (const [source, page] of pages) for (const match of page.body.matchAll(/href="((?:\/(?!_next)|#)[^"]*)"/g)) {
@@ -75,6 +104,7 @@ for (const path of ["/admin", "/admin/inventory", "/api/admin/finance", "/auth/l
   const page = await request(path);
   assert.equal(page.status, 404);
   assert.match(page.body, /Page not found/);
+  assert.match(page.body, /noindex/);
 }
 for (const name of ["gpu", "cpu", "memory", "storage"]) {
   const image = await request(`/images/catalog/sample-${name}.svg`);
@@ -94,9 +124,12 @@ for (const weight of [400, 500, 600, 700]) {
 }
 const robots = await request("/robots.txt");
 assert.equal(robots.status, 200);
-assert.match(robots.body, /Disallow: \//);
+assert.match(robots.body, /Allow: \//);
+assert.match(robots.body, /Disallow: \/admin/);
+assert.doesNotMatch(robots.body, /Disallow: \/\r?\n/);
 const sitemap = await request("/sitemap.xml");
 assert.equal(sitemap.status, 200);
 assert.match(sitemap.body, /urlset/);
 assert.doesNotMatch(sitemap.body, /sample-|supabase/);
+for (const path of ["/", "/shop", "/contact", "/products/z890-aorus-pro-ice", "/policies/returns"]) assert.ok(sitemap.body.includes(`${productionOrigin}${path}`));
 console.log(`${checks} public loopback HTTP checks passed across ${routes.length} pages, navigation destinations, assets, SEO and missing/private routes. No database or Auth requests.`);

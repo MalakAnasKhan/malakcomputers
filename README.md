@@ -7,8 +7,8 @@ build or run the public storefront.
 
 The approved WhatsApp number is **923109806478**. Demonstration products are
 clearly labeled samples and cannot be ordered. Photo-discovered products accept
-general price/stock enquiries without asserting availability. Search indexing remains disabled
-until real product data, policies and business details are approved.
+general price/stock enquiries without asserting availability. Approved production pages
+are indexable; samples, unpublished listings and Vercel previews are excluded.
 
 ## Local development
 
@@ -49,7 +49,7 @@ from this public repository. Never add them to installation or deployment hooks.
 - `src/lib/site.ts`: approved public brand, WhatsApp, contact and HTTPS origin settings.
 - `src/lib/whatsapp.ts`: encoded general-chat and product enquiry links.
 - `public/products/`: optimized product photography.
-- `src/app/(storefront)/`: public pages and clearly marked draft policies.
+- `src/app/(storefront)/`: public pages and the four owner-approved policies.
 
 Add exactly four numbered originals per product to `product-images-original/`,
 then run `npm.cmd run images`. Originals are preserved and ignored by Git.
@@ -90,6 +90,15 @@ See the [GitHub/Vercel guide](docs/storefront-launch.md). Vercel uses Node.js 24
 are required. `.vercelignore` further limits deployment uploads to public build
 inputs. No push or deployment is performed by any validation command.
 
-A real sales launch still requires approved product records and images, prices,
-stock, final policies and the public HTTPS origin in `site.url`. General WhatsApp
-chat works now; all product orders and payments require manual confirmation.
+The approved origin is https://malakcomputers.vercel.app. Contact and footer show
+the approved Mingora office address and a Google Maps address-search link. No hours,
+email, social profiles or GPS coordinates are inferred.
+
+Product-level `checkingWarrantyEligible: true` is required before a seven-day
+checking warranty is shown. Missing eligibility displays a neutral warranty enquiry;
+samples receive no coverage claim. `published: false` removes a product from public
+listings, detail routes and the sitemap. Manual catalog data remains authoritative.
+
+Prices, stock, condition and warranty eligibility still need product-specific
+approval. All orders and payments require manual WhatsApp confirmation. See the
+[deployment guide](docs/storefront-launch.md) for indexing and manual Search Console setup.
