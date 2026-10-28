@@ -52,13 +52,17 @@ for (const path of routes) {
   assert.match(page.body, /Chat on WhatsApp/);
   for (const link of page.body.matchAll(/<a\b[^>]*href="(https:\/\/wa\.me\/[^\"]+)"[^>]*>/g)) {
     const url = new URL(link[1].replaceAll("&amp;", "&"));
-    assert.equal(url.pathname, "/923109806478");
+    assert.ok(["/923109806478", "/923229124952"].includes(url.pathname));
+    if (url.searchParams.get("text")?.includes("Product ID/SKU:")) assert.equal(url.pathname, "/923109806478");
     assert.ok(url.searchParams.get("text"));
     assert.match(link[0], /target="_blank"/);
     assert.match(link[0], /rel="noopener noreferrer"/);
     if (path.startsWith("/products/") && page.body.includes("Sample listing")) assert.doesNotMatch(url.searchParams.get("text"), /Product ID\/SKU:|I would like to order:/);
   }
   assert.doesNotMatch(page.body, /supabase\.co|postgres(?:ql)?:\/\/|href="\/auth|href="\/admin/);
+  assert.match(page.body, /\+92 310 9806478/);
+  assert.match(page.body, /\+92 322 9124952/);
+  assert.doesNotMatch(page.body, /suppliers in China|sourcing hardware through suppliers in China/);
   if (path.startsWith("/products/")) {
     assert.match(page.body, /Specifications/);
     assert.match(page.body, /SKU:/);

@@ -5,7 +5,9 @@ product galleries, search and filters, category pages and WhatsApp enquiries.
 No database, authentication service or environment variables are required to
 build or run the public storefront.
 
-The approved WhatsApp number is **923109806478**. Demonstration products are
+Approved WhatsApp contacts are **+92 310 9806478** and **+92 322 9124952**.
+Product enquiries use the first number; both are available on Contact and in the footer.
+Demonstration products are
 clearly labeled samples and cannot be ordered. Photo-discovered products accept
 general price/stock enquiries without asserting availability. Approved production pages
 are indexable; samples, unpublished listings and Vercel previews are excluded.

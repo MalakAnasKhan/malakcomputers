@@ -6,7 +6,7 @@ export function organizationStructuredData() {
   if (!site.url) return null;
   return { "@context": "https://schema.org", "@graph": [
     { "@type": "Organization", "@id": `${site.url}/#organization`, name: site.name, url: site.url,
-      ...(site.whatsappNumber ? { telephone: `+${site.whatsappNumber}` } : {}),
+      ...(site.whatsappContacts.length ? { telephone: site.whatsappContacts.map(contact => `+${contact.number}`) } : {}),
       ...(site.contact.address ? { address: site.contact.address } : {}) },
     { "@type": "WebSite", "@id": `${site.url}/#website`, name: site.name, url: site.url, publisher: { "@id": `${site.url}/#organization` } },
   ] };

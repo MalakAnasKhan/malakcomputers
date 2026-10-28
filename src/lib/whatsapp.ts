@@ -14,6 +14,6 @@ export function whatsappUrl(number: string | null, message: string): string | nu
 }
 
 /** General questions do not imply a product order or bypass catalog approval. */
-export function generalEnquiryUrl(): string | null {
-  return whatsappUrl(site.whatsappNumber, `Hello ${site.name}, I have a question about PC hardware. Could you help me?`);
+export function generalEnquiryUrl(number: string | null = site.whatsappNumber): string | null {
+  return whatsappUrl(number, `Hello ${site.name}, I have a question about PC hardware. Could you help me?`);
 }

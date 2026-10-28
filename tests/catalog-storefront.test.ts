@@ -14,6 +14,7 @@ import { site, directionsUrl } from "../src/lib/site";
 import { isPreviewDeployment } from "../src/modules/storefront/deployment";
 import { organizationStructuredData, productStructuredData, breadcrumbStructuredData, serializeStructuredData } from "../src/modules/storefront/structured-data";
 import { ProductTrust } from "../src/modules/catalog/product-trust";
+import { WhatsAppContacts } from "../src/components/storefront/whatsapp-contacts";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
@@ -43,6 +44,28 @@ test("approved business contact and public origin agree while sample ordering st
   assert.equal(map.searchParams.get("api"), "1");
   assert.equal(directionsUrl(null), null);
   for (const product of products.filter(product => product.isSample)) assert.equal(productEnquiryUrl(product, site.whatsappNumber, "https://store.example"), null);
+});
+
+test("both approved WhatsApp contacts render safe links without changing primary product routing", () => {
+  assert.deepEqual(site.whatsappContacts.map(contact => contact.number), ["923109806478", "923229124952"]);
+  assert.equal(new Set(site.whatsappContacts.map(contact => contact.number)).size, 2);
+  for (const contact of site.whatsappContacts) {
+    assert.equal(contact.display.replace(/\D/g, ""), contact.number);
+    const url = new URL(generalEnquiryUrl(contact.number)!);
+    assert.equal(url.origin, "https://wa.me");
+    assert.equal(url.pathname, `/${contact.number}`);
+    assert.ok(url.searchParams.get("text")!.includes(site.name));
+  }
+  for (const compact of [false, true]) {
+    const html = renderToStaticMarkup(createElement(WhatsAppContacts, { compact }));
+    assert.equal((html.match(/<a\b/g) ?? []).length, 2);
+    for (const contact of site.whatsappContacts) assert.ok(html.includes(contact.display));
+    assert.equal((html.match(/rel="noopener noreferrer"/g) ?? []).length, 2);
+  }
+  assert.equal(new URL(productEnquiryUrl(fixture(), site.whatsappNumber)!).pathname, "/923109806478");
+  const organization = organizationStructuredData()!["@graph"].find(node => node["@type"] === "Organization")!;
+  assert.ok("telephone" in organization);
+  assert.deepEqual(organization.telephone, ["+923109806478", "+923229124952"]);
 });
 
 test("approved available product enquiries use the official number and encode full manual-order details", () => {
