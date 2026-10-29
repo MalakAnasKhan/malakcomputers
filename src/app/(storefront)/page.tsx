@@ -20,15 +20,12 @@ export default function HomePage() {
       <PageContainer>
         <div className="hero-grid">
           <div className="hero-copy">
-            <MotionElement as="p" motion="hero" order={0} className="eyebrow">PC hardware. Personal possibilities.</MotionElement>
             <MotionElement as="h1" motion="hero" order={1}>Your next build.<br />A better<br /><span>starting point.</span></MotionElement>
             <MotionElement as="p" motion="hero" order={2} className="hero-description">For the games, the work, the ideas still to come. Explore computer components with Malak Computers. Build something that feels like you.</MotionElement>
             <MotionElement motion="hero" order={3} className="hero-actions"><Link href="/shop" className="button">Shop now<Icon name="arrow-up" /></Link><Link href="/categories" className="text-link">Explore categories<Icon name="arrow" /></Link></MotionElement>
-            <MotionElement motion="hero" order={4} className="hero-note"><span className="note-icon"><Icon name="chat" width="15" height="15" /></span><span>Based in Pakistan.<br />Order details confirmed on WhatsApp.</span></MotionElement>
           </div>
           <EditorialImage kind="hero" priority />
         </div>
-        <div className="hero-bottom"><span>THE COMPONENTS BEHIND WHAT’S NEXT.</span><div className="hero-bottom-links"><Link href="/categories/graphics-cards">Graphics cards</Link><Link href="/categories/processors">Processors</Link><Link href="/categories/memory">Memory</Link><Link href="/categories/storage">Storage</Link></div><Link href="#how-to-order" className="text-link">How to order<Icon name="arrow" /></Link></div>
       </PageContainer>
     </section>
     <section className="section-space" aria-labelledby="categories-heading">

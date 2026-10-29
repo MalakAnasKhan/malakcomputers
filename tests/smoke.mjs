@@ -62,7 +62,9 @@ for (const path of routes) {
   assert.doesNotMatch(page.body, /supabase\.co|postgres(?:ql)?:\/\/|href="\/auth|href="\/admin/);
   assert.match(page.body, /\+92 310 9806478/);
   assert.match(page.body, /\+92 322 9124952/);
-  assert.doesNotMatch(page.body, /suppliers in China|sourcing hardware through suppliers in China/);
+  // Historical sourcing is approved in the founder story; shared footer copy stays unchanged.
+  if (path !== "/about") assert.doesNotMatch(page.body, /suppliers in China|sourcing hardware through suppliers in China/);
+  assert.doesNotMatch(page.body.match(/<footer\b[\s\S]*?<\/footer>/)?.[0] ?? "", /China/);
   if (path.startsWith("/products/")) {
     assert.match(page.body, /Specifications/);
     assert.match(page.body, /SKU:/);
@@ -86,11 +88,18 @@ for (const path of routes) {
 for (const path of ["/", "/shop", "/categories", "/about", "/contact"]) assert.ok(pages.has(path));
 assert.match(pages.get("/").body, /Why Malak Computers/);
 assert.match(pages.get("/").body, /id="how-to-order"/);
+const about = pages.get("/about").body;
+for (const heading of ["Every Great Build Starts Somewhere.", "The First Rs. 5,000", "Then I Lost Almost Everything.", "Learning Before Growing.", "Built From Experience. Driven by Passion.", "More Than a Computer Store.", "Our Story Is Still Being Written."]) assert.ok(about.includes(heading), `Founder story section: ${heading}`);
+assert.ok(about.includes("approximately 80% of the investment in that shipment"));
+assert.ok(about.includes("Not the entire business."));
+assert.ok(about.includes('id="how-to-order"'));
+assert.match(about, /AI-generated editorial concept/);
 assert.match(pages.get("/shop").body, /data-product-card=/);
 assert.match(pages.get("/shop").body, /id="search"/);
 assert.match(pages.get("/contact").body, /\+92 310 9806478/);
 for (const [path, page] of pages) {
-  assert.ok(page.body.includes("Office # 01, CoWork Floor 1 of CFC Center, Bypass Mingora Swat, Khyber Pakhtunkhwa, Pakistan."), `Address in footer: ${path}`);
+  assert.ok(page.body.includes("Office No. 1, 1st Floor, CFC &amp; CoWorx Center Qambar Bypass Near SPS Girls College, Bahrain Road Mingora, Swat, Pakistan"), `Address in footer: ${path}`);
+  assert.ok(page.body.includes('href="https://maps.app.goo.gl/ct1vB35o3pFuDHzv6"'), `Approved map link: ${path}`);
   assert.match(page.body, /Get Directions/);
   assert.doesNotMatch(page.body, /Policies awaiting approval/);
 }

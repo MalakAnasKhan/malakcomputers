@@ -13,7 +13,7 @@ function useElementMotion<T extends HTMLElement>(motion: Motion, order: number) 
   const ref = useRef<T>(null);
   const pathname = usePathname();
   useEffect(() => {
-    if (pathname !== "/") return;
+    if (pathname !== "/" && pathname !== "/about") return;
     const media = window.matchMedia("(min-width: 1024px) and (pointer: fine) and (prefers-reduced-motion: no-preference)");
     const device = navigator as Navigator & { deviceMemory?: number; connection?: Connection };
     let disposed = false, generation = 0;

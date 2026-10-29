@@ -68,7 +68,7 @@ form and editorial components keep secondary pages consistent with the homepage.
 
 Lenis 1.3.27 smooth scrolling is available across all pages through the root motion
 surface on capable desktop devices. GSAP 3.15.0 and ScrollTrigger are loaded only
-for homepage reveals and parallax. Mobile, save-data and reduced-motion users
+for homepage and About-story reveals and parallax. Mobile, save-data and reduced-motion users
 keep native scrolling and fully visible content. Cleanup
 restores inline styles, listeners, scrolling and animation timers on navigation
 or preference changes. Same-document anchors preserve focus and browser history.
@@ -95,7 +95,7 @@ are required. `.vercelignore` further limits deployment uploads to public build
 inputs. No push or deployment is performed by any validation command.
 
 The approved origin is https://malakcomputers.vercel.app. Contact and footer show
-the approved Mingora office address and a Google Maps address-search link. No hours,
+the approved Mingora office address and business-supplied Google Maps location link. No hours,
 email, social profiles or GPS coordinates are inferred.
 
 Product-level `checkingWarrantyEligible: true` is required before a seven-day

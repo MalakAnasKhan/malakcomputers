@@ -7,6 +7,7 @@ type SiteSettings = {
   whatsappNumber: string | null;
   whatsappContacts: readonly { label: string; number: string; display: string }[];
   contact: { email: string | null; phone: string | null; address: string | null };
+  locationUrl: string | null;
   socials: readonly { label: string; url: string }[];
   /** Public ownership token supplied by Search Console; never use a fabricated token. */
   googleSiteVerification: string | null;
@@ -26,12 +27,14 @@ export const site: SiteSettings = {
   url: "https://malakcomputers.vercel.app",
   whatsappNumber: whatsappContacts[0].number,
   whatsappContacts,
-  contact: { email: null, phone: whatsappContacts[0].display, address: "Office # 01, CoWork Floor 1 of CFC Center, Bypass Mingora Swat, Khyber Pakhtunkhwa, Pakistan." },
+  contact: { email: null, phone: whatsappContacts[0].display, address: "Office No. 1, 1st Floor, CFC & CoWorx Center Qambar Bypass Near SPS Girls College, Bahrain Road Mingora, Swat, Pakistan" },
+  locationUrl: "https://maps.app.goo.gl/ct1vB35o3pFuDHzv6",
   socials: [],
   googleSiteVerification: null,
 };
 
-/** Address search only: no inferred coordinates or verified map pin. */
+/** Use the business-supplied map link; other addresses remain search queries. */
 export function directionsUrl(address: string | null = site.contact.address): string | null {
+  if (address === site.contact.address && address?.trim() && site.locationUrl) return site.locationUrl;
   return address?.trim() ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}` : null;
 }
