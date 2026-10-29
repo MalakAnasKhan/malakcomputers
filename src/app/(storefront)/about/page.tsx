@@ -31,8 +31,7 @@ export default function AboutPage() {
 
     <section id="the-beginning" className="founder-chapter" aria-labelledby="beginning-heading">
       <PageContainer>
-        <div className="founder-origin-grid">
-          <EditorialImage kind="story" />
+        <div className="founder-split">
           <MotionElement className="founder-prose">
             <p className="eyebrow">01 / A gaming dream · 2022</p>
             <h2 id="beginning-heading">Every Great Build Starts Somewhere.</h2>
@@ -40,6 +39,7 @@ export default function AboutPage() {
             <p>Back home, I kept searching online. I found an RX 580 8GB for PKR 17,000 from a verified seller. I was excited to find it at that price, and I ordered the card.</p>
             <p>Then it arrived. After all that anticipation, there was one problem: it didn’t fit my computer.</p>
           </MotionElement>
+          <EditorialImage kind="story" />
         </div>
       </PageContainer>
     </section>
@@ -66,7 +66,7 @@ export default function AboutPage() {
       </PageContainer>
     </section>
 
-    <section className="founder-chapter founder-setback dark-surface" aria-labelledby="setback-heading">
+    <section className="founder-chapter" aria-labelledby="setback-heading">
       <PageContainer>
         <div className="founder-split">
           <MotionElement className="founder-prose">
@@ -77,10 +77,11 @@ export default function AboutPage() {
             <p>It was painful. I had built up that money one graphics card at a time. My family was upset, but my father remained supportive. His support mattered when I was trying to work out how to move forward.</p>
             <p>I couldn’t undo the loss. I could learn from it, though, and start again more carefully.</p>
           </MotionElement>
-          <MotionElement className="founder-loss-note">
-            <span className="eyebrow">A lesson I carried forward</span>
-            <p>Before I bought more, I needed to understand the hardware—and everything it takes to bring it here.</p>
-            <span className="founder-small">Components. Compatibility. Sourcing. Costs.</span>
+          <MotionElement className="founder-loss-note dark-surface">
+            <p className="eyebrow">One shipment. A difficult lesson.</p>
+            <p className="founder-loss-figure"><span>Approximately</span><strong>80%</strong><span>of that shipment’s investment lost</span></p>
+            <p className="founder-loss-caption">Not 80% of the entire business.</p>
+            <p className="founder-loss-lesson">Before I bought more, I needed to understand the hardware—and everything it takes to bring it here.</p>
           </MotionElement>
         </div>
       </PageContainer>
@@ -88,13 +89,18 @@ export default function AboutPage() {
 
     <section className="founder-chapter" aria-labelledby="learning-heading">
       <PageContainer>
-        <div className="founder-reading-grid">
-          <div className="founder-margin-note"><p className="eyebrow">04 / Starting again</p><span>Understand the part.<br />Then take the next step.</span></div>
+        <div className="founder-split">
           <MotionElement className="founder-prose">
+            <p className="eyebrow">04 / Starting again</p>
             <h2 id="learning-heading">Learning Before Growing.</h2>
             <p>I spent more time learning about computer components, compatibility, suppliers and international sourcing. Along the way, I built relationships with hardware suppliers in China.</p>
             <p>I started again with individual graphics cards and smaller orders. It was gradual. As I learned more, I began buying motherboards, processors and other computer hardware too.</p>
             <p>That first card had taught me to pay attention to compatibility. The difficult shipment taught me to look beyond the purchase price. Both experiences still shape how I think about hardware.</p>
+          </MotionElement>
+          <MotionElement className="founder-learning-note">
+            <p className="eyebrow">A more careful approach</p>
+            <p className="founder-note-title">Understand the part.<br />Then take the next step.</p>
+            <ul>{["Components & compatibility", "Suppliers & sourcing", "The cost beyond the purchase"].map(item => <li key={item}><Icon name="check" />{item}</li>)}</ul>
           </MotionElement>
         </div>
       </PageContainer>
@@ -123,13 +129,19 @@ export default function AboutPage() {
 
     <section className="founder-chapter" aria-labelledby="store-heading">
       <PageContainer>
-        <div className="founder-reading-grid">
-          <div className="founder-margin-note"><p className="eyebrow">06 / A direct conversation</p><Link href="/contact" className="text-link">Get in touch<Icon name="arrow-up" /></Link></div>
+        <div className="founder-split">
           <MotionElement className="founder-prose">
+            <p className="eyebrow">06 / A direct conversation</p>
             <h2 id="store-heading">More Than a Computer Store.</h2>
             <p>The storefront gives you a place to explore hardware and put together a shortlist. Product pages lead to a WhatsApp enquiry, where we can discuss the item, current price, availability, condition and warranty eligibility.</p>
             <p>Orders and payment arrangements are confirmed personally on WhatsApp. We also discuss delivery to your city, shipping charges and dispatch details there. There is no automated checkout or payment on this website.</p>
             <p>Need help before choosing, or have a question after delivery? <Link href="/contact">Talk to our team.</Link> For delivery and after-sales terms, see our <Link href="/policies/shipping">Shipping Policy</Link> and <Link href="/policies/returns">Returns &amp; Warranty Policy</Link>.</p>
+          </MotionElement>
+          <MotionElement className="founder-contact-note">
+            <p className="eyebrow">Your next build</p>
+            <p className="founder-note-title">A question.<br />A real conversation.</p>
+            <ContactCta compact />
+            <Link href="/contact" className="text-link">Get in touch<Icon name="arrow-up" /></Link>
           </MotionElement>
         </div>
       </PageContainer>
