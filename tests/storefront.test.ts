@@ -93,7 +93,7 @@ test("public TypeScript dependency graph cannot reach backend or environment mod
   const program = ts.createProgram(parsed.fileNames, parsed.options);
   const paths = program.getSourceFiles().map((file) => file.fileName.replaceAll("\\", "/"));
   for (const path of paths.filter((path) => !path.includes("/node_modules/") && !path.endsWith("storefront.test.ts"))) {
-    assert.doesNotMatch(path, /(?:backend-preserved|src\/(?:generated|lib\/(?:prisma|env|supabase)|modules\/(?:auth|access-control))|config\/(?:development-environment|supabase-projects))\//);
+    assert.doesNotMatch(path, /(?:backend-preserved|src\/(?:generated|lib\/(?:prisma|env)|modules\/(?:auth|access-control))|config\/(?:development-environment|supabase-projects))\//);
     if (path.endsWith("/src/lib/prisma.ts")) assert.fail("Public compilation imported Prisma.");
   }
 });

@@ -1,6 +1,20 @@
-export const categories = ["Graphics cards", "Processors", "Memory", "Storage"] as const;
+export const categories = [
+  "Graphics cards",
+  "Processors",
+  "Motherboards",
+  "Memory",
+  "Storage",
+  "Power supplies",
+  "Cases",
+  "Cooling",
+  "Pre-builts",
+] as const;
+
 export type Category = (typeof categories)[number];
 export type StockStatus = "in-stock" | "out-of-stock" | "on-request" | "unconfirmed";
+
+export const conditions = ["Used", "Refurbished", "Box Pack"] as const;
+export type Condition = (typeof conditions)[number];
 
 export type Product = {
   readonly id: string;
@@ -10,6 +24,7 @@ export type Product = {
   readonly category: Category | null;
   /** Whole Pakistani rupees; null means no approved price. */
   readonly pricePkr: number | null;
+  readonly condition?: Condition;
   readonly images: readonly [{ readonly src: string; readonly alt: string }, ...{ readonly src: string; readonly alt: string }[]];
   readonly description: string;
   readonly specifications: readonly { readonly name: string; readonly value: string }[];

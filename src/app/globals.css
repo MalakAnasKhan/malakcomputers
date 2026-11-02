@@ -246,7 +246,7 @@ html.lenis, html.lenis body { height: auto; }
 @media (min-width: 1024px) {
   .hero-grid { grid-template-columns: .9fr 1.1fr; gap: 28px; align-items: stretch; }
   .hero-copy { padding: 40px 0 32px; }
-  .editorial-hero .editorial-image-frame { min-height: 530px; height: calc(100% - 40px); aspect-ratio: auto; }
+  .editorial-hero .editorial-image-frame { min-height: 530px; height: 100%; aspect-ratio: auto; }
   .hero-section { padding-top: 30px; }
   .order-grid { grid-template-columns: repeat(4,minmax(0,1fr)); }
   .page-intro { padding-top: 40px; padding-bottom: 50px; }
