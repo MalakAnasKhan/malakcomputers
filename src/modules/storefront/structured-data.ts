@@ -6,9 +6,11 @@ export function organizationStructuredData() {
   if (!site.url) return null;
   return { "@context": "https://schema.org", "@graph": [
     { "@type": "Organization", "@id": `${site.url}/#organization`, name: site.name, url: site.url,
+      logo: `${site.url}/icon-512.png`,
+      image: `${site.url}/icon-512.png`,
       ...(site.whatsappContacts.length ? { telephone: site.whatsappContacts.map(contact => `+${contact.number}`) } : {}),
       ...(site.contact.address ? { address: site.contact.address } : {}) },
-    { "@type": "WebSite", "@id": `${site.url}/#website`, name: site.name, url: site.url, publisher: { "@id": `${site.url}/#organization` } },
+    { "@type": "WebSite", "@id": `${site.url}/#website`, name: site.name, alternateName: ["Malak Computers Pakistan", "MalakComputers"], url: site.url, publisher: { "@id": `${site.url}/#organization` } },
   ] };
 }
 

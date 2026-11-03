@@ -12,7 +12,12 @@ import { FinalCta } from "@/components/storefront/final-cta";
 import { Icon } from "@/components/ui/icon";
 import { pageMetadata } from "@/modules/storefront/seo";
 
-export const metadata = pageMetadata("PC hardware for what’s next", "Explore PC hardware with Malak Computers, a Pakistan-based business. Browse components and confirm your order personally on WhatsApp.", "/");
+export const metadata = {
+  ...pageMetadata("PC hardware for what’s next", "Explore PC hardware with Malak Computers, a Pakistan-based business. Browse components and confirm your order personally on WhatsApp.", "/"),
+  title: {
+    absolute: "Malak Computers — PC hardware for what’s next",
+  },
+};
 
 export default function HomePage() {
   return <>

@@ -21,8 +21,43 @@ const poppins = localFont({
 const origin = publicOrigin(site.url);
 
 export const metadata: Metadata = {
+  applicationName: site.name,
   title: { default: site.name, template: `%s | ${site.name}` },
   description: site.description,
+  appleWebApp: {
+    title: site.name,
+    capable: true,
+    statusBarStyle: "default",
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon-48.png", sizes: "48x48", type: "image/png" },
+      { url: "/icon-96.png", sizes: "96x96", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: ["/favicon.ico"],
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_PK",
+    url: origin ?? site.url ?? undefined,
+    siteName: site.name,
+    title: site.name,
+    description: site.description,
+    images: [
+      {
+        url: "/icon-512.png",
+        width: 512,
+        height: 512,
+        alt: site.name,
+      },
+    ],
+  },
   ...(site.googleSiteVerification ? { verification: { google: site.googleSiteVerification } } : {}),
   ...(origin ? { metadataBase: new URL(origin) } : {}),
   robots: site.preview || !origin || isPreviewDeployment() ? { index: false, follow: false } : { index: true, follow: true },
