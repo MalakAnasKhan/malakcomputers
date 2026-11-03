@@ -80,7 +80,6 @@ next-env.d.ts
 /tsconfig.backend.json
 /src/lib/env/
 /src/lib/prisma.ts
-/src/lib/supabase/
 /src/modules/auth/
 /src/modules/access-control/
 /src/**/*.md

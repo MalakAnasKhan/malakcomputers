@@ -11,7 +11,7 @@ export function forbiddenReleasePath(path) {
 export function privateRepositoryPath(path) {
   return /^(?:backend-preserved|config|prisma|Reference Images)\//.test(path) ||
     /^(?:prisma\.config\.ts|tsconfig\.backend\.json|index\.html|style\.css)$/.test(path) ||
-    /^src\/(?:lib\/(?:env|supabase)\/|lib\/prisma\.ts$|modules\/(?:auth|access-control)\/)/.test(path) ||
+    /^src\/(?:lib\/env\/|lib\/prisma\.ts$|modules\/(?:auth|access-control)\/)/.test(path) ||
     /^src\/.*\.(?:md|sql)$/i.test(path) ||
     /^docs\//.test(path) && !["docs/storefront-launch.md", "docs/product-images.md"].includes(path) ||
     /^tests\//.test(path) && !["tests/storefront.test.ts", "tests/catalog-storefront.test.ts", "tests/visual-storefront.test.ts", "tests/images.test.ts", "tests/release-secrets.test.mjs", "tests/register.mjs", "tests/server-only.mjs", "tests/smoke.mjs"].includes(path) ||
